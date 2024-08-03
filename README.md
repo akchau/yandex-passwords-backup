@@ -19,7 +19,7 @@
 1. Склонируйте репозиторий:
 ```bash
 git@gitflic.ru:glazarev/yandex-password-backup.git
- сc yandex-password-backup
+сd yandex-password-backup
 ```
 
 2. Установите виртуальное venv-окружение и активируйте:
@@ -29,6 +29,11 @@ source venv/bin/activate
 ```
 
 3. Установите зависимости:
+```bash
+pip install -r req.txt
+```
+
+4. Укажите данные приложения в .env:
 ```bash
 pip install -r req.txt
 ```

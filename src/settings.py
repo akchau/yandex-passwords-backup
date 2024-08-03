@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     # Режим работы
     DEBUG: bool
     ARCHIVE_PASSWORD: str
-    TEMP_DATA_PATH: str
+    TEMP_DATA_PATH: str = os.path.join(BASE_DIR, "temp_data")
     INPUT_PATH: str
 
     class Config:
