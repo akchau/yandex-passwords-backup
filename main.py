@@ -1,6 +1,18 @@
-def runserver(*args, **kwargs) -> None:
-    print("Сервер запущен")
+import sys
+from typing import Callable
 
+from src.web.init_app import get_app_data
+
+
+class StartCommandError(Exception):
+    pass
+
+
+def runserver():
+    report = get_app_data().domain.password_synchronization(
+        yandex_zip_archive_name="yandex_browser_passwords_2024-07-18.zip"
+    )
+    print(report)
 
 
 REGISTERED_COMMANDS = {
@@ -34,7 +46,7 @@ def main(command_pool: dict[str, Callable]) -> None:
         else:
             args = []
         # Запуск с аргументами
-        target_func(args)
+        target_func(*args)
 
 
 if __name__ == '__main__':

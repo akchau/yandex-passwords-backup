@@ -1,0 +1,2 @@
+class NotOneFileInPasswordArchive(Exception):
+    pass
