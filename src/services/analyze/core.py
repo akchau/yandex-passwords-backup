@@ -29,4 +29,5 @@ class PasswordAnalyzer:
             google_not_pair=not_pair_record_result.google,
             pair_result_google=pair_result.google,
             pair_result_yandex=pair_result.yandex,
+            good_pairs_num=pair_result.good_pairs_num
         )

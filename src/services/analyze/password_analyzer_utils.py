@@ -69,11 +69,18 @@ class PasswordAnalyzerUtils(object):
         yandex_set_with_password = set(tuple(sorted(t)) for t in yandex_passwords_without_repeat)
         google_set_with_password = set(tuple(sorted(t)) for t in google_passwords_without_repeat)
 
+
+
         return PairResult(
             google=[t for t in google_passwords_without_repeat
                     if tuple(sorted((t[0], t[1]))) in yandex_set and
                     tuple(sorted(t)) not in yandex_set_with_password],
             yandex=[t for t in yandex_passwords_without_repeat
                     if tuple(sorted((t[0], t[1]))) in google_set and
-                    tuple(sorted(t)) not in google_set_with_password]
+                    tuple(sorted(t)) not in google_set_with_password],
+            good_pairs_num=len(
+                [t for t in yandex_passwords_without_repeat
+                 if tuple(sorted((t[0], t[1]))) in google_set and
+                 tuple(sorted(t)) in google_set_with_password]
+            )
         )

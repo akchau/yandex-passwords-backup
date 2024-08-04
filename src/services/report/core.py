@@ -65,6 +65,7 @@ class Report:
             self.__add_pair_records(data=data.pair_result_yandex, service=SourceType.YANDEX)
         if data.pair_result_google:
             self.__add_pair_records(data=data.pair_result_google, service=SourceType.GOOGLE)
+        self.__add_string(string=f"НАЙДЕНО {data.good_pairs_num} ПАР.")
 
     def __repr__(self):
         return self.__detail
