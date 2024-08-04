@@ -37,3 +37,6 @@ pip install -r req.txt
 ```bash
 pip install -r req.txt
 ```
+
+# Меню:
+[Changelog](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
