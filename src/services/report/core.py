@@ -31,14 +31,14 @@ class Report:
             self.__add_string(string=message.format(host=host, login=login))
         self.__add_line()
 
-    def __add_not_pair_records(self, data, service: SourceType):
+    def __add_not_pair_records(self, data, service: str):
         self.__add_record(
             title=f"ПРОВЕРКА ПАР ПАРОЛЕЙ {len(data)} НЕ НАШАЛА ПАРЫ НА СЕРВИСЕ {service} :\n",
             message="{host} {login}",
             data=data
         )
 
-    def __add_repeat(self, data, service: SourceType):
+    def __add_repeat(self, data, service: str):
         self.__add_record(
             title=f"ПРОВЕРКА ПОВТОРОВ ВЫЯВИЛА {len(data)} ПОВТОРЫ на сервисе: {service}\n",
             message="{host} {login}",
