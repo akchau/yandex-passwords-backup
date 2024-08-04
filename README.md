@@ -5,6 +5,12 @@
 
 Сервис для работы с личными паролями в хранилищаx.
 
+***
+# Меню:
+- [Запуск](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Flaunch.md&branch=master&mode=markdown)
+- [Changelog](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
+***
+
 ## Что умеет сервис?
 
 1. Получать пароли из зашифрованного zip-архива из сервиса Яндекс.Пароли.
@@ -13,8 +19,3 @@
    - Повторы.
    - Отсутствие пар.
    - Различающиеся пароли в парах.
-
-
-# Меню:
-- [Запуск](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Flaunch.md&branch=master&mode=markdown)
-- [Changelog](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
