@@ -10,7 +10,7 @@ class Settings(BaseSettings):
     DEBUG: bool
     ARCHIVE_PASSWORD: str
     TEMP_DATA_PATH: str = os.path.join(BASE_DIR, "temp_data")
-    INPUT_PATH: str
+    INPUT_PATH: str = os.path.join(BASE_DIR, "input_data")
 
     class Config:
         env_file = os.path.join(BASE_DIR, '.env')

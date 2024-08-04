@@ -16,5 +16,5 @@
 
 
 # Меню:
-- [Запуск](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
+- [Запуск](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Flaunch.md&branch=master&mode=markdown)
 - [Changelog](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
