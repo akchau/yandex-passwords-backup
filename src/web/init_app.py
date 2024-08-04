@@ -29,12 +29,12 @@ AppDataClasses = AppDataClassesType(
 
 __yandex_parser = AppDataClasses.yandex_parser_class(
     archive_password=settings.ARCHIVE_PASSWORD,
-    input_dir_path=settings.INPUT_PATH,
     temp_dir_path=settings.TEMP_DATA_PATH
 )
 
 __google_parser = AppDataClasses.google_parser_class()
-__domain = AppDataClasses.domain_class(yandex_parser=__yandex_parser, google_sheets_parser=__google_parser)
+__domain = AppDataClasses.domain_class(yandex_parser=__yandex_parser, google_sheets_parser=__google_parser,
+                                       input_dir_path=settings.INPUT_PATH, temp_dir_path=settings.TEMP_DATA_PATH)
 
 
 def get_app_data() -> AppDataType:
