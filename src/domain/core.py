@@ -30,6 +30,7 @@ class PasswordDomain:
             path=path_of_archive
         )
         google_sheets_passwords: list[tuple[str, str, str]] = self.__google_sheets_parser.get_passwords_data()
+
         result: AnalyzeResult = self.__analyzer.analyze(yandex_passwords=yandex_passwords,
                                                         google_passwords=google_sheets_passwords)
 

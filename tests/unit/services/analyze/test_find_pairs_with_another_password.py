@@ -24,7 +24,7 @@ class TestFindPairs(unittest.IsolatedAsyncioTestCase):
         ]
 
         self.assertEqual(
-            self.utils.find_pairs(
+            self.utils.find_pairs_with_another_password(
                 yandex_passwords=test_data_yandex,
                 google_passwords=test_data_google,
             ),
@@ -53,7 +53,7 @@ class TestFindPairs(unittest.IsolatedAsyncioTestCase):
         ]
 
         self.assertEqual(
-            self.utils.find_pairs(
+            self.utils.find_pairs_with_another_password(
                 yandex_passwords=test_data_yandex,
                 google_passwords=test_data_google,
             ),

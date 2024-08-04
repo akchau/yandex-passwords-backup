@@ -38,6 +38,13 @@ class Report:
             data=data
         )
 
+    def __add_pair_records(self, data, service: str):
+        self.__add_record(
+            title=f"ПРОВЕРКА ПАР ПАРОЛЕЙ {len(data)} НАШАЛА ПАРЫ НА СЕРВИСЕ У КОТОРЫХ ОТЛИЧАЮТСЯ ПАРОЛИ {service} :\n",
+            message="{host} {login}",
+            data=data
+        )
+
     def __add_repeat(self, data, service: str):
         self.__add_record(
             title=f"ПРОВЕРКА ПОВТОРОВ ВЫЯВИЛА {len(data)} ПОВТОРЫ на сервисе: {service}\n",
@@ -53,7 +60,11 @@ class Report:
         if data.yandex_not_pair:
             self.__add_not_pair_records(data=data.yandex_not_pair, service=SourceType.YANDEX)
         if data.google_not_pair:
-            self.__add_not_pair_records(data=data.yandex_not_pair, service=SourceType.YANDEX)
+            self.__add_not_pair_records(data=data.yandex_not_pair, service=SourceType.GOOGLE)
+        if data.pair_result_yandex:
+            self.__add_pair_records(data=data.pair_result_yandex, service=SourceType.YANDEX)
+        if data.pair_result_google:
+            self.__add_pair_records(data=data.pair_result_google, service=SourceType.GOOGLE)
 
     def __repr__(self):
         return self.__detail
