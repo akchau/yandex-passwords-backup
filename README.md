@@ -9,6 +9,7 @@
 # Меню:
 - [Запуск](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Flaunch.md&branch=master&mode=markdown)
 - [Changelog](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2Fchange_log.md&branch=master&mode=markdown)
+- [Схема сервиса](https://gitflic.ru/project/glazarev/yandex-password-backup/blob?file=docs%2FCхема%20сервиса%20бекапа%20паролей.png&branch=master)
 ***
 
 ## Что умеет сервис?
