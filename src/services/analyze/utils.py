@@ -1,4 +1,5 @@
-from src.services.analyze.analyze_types import ListPasswordRecords
+from zxcvbn import zxcvbn
+from src.services.analyze.analyze_types import ListPasswordRecords, PasswordRecord
 
 
 class RepeatFilterUtil:
@@ -120,3 +121,27 @@ class AnotherPasswordInPairFilter:
             compare_passwords_list=backup_passwords
         )
         return google_pairs_with_not_equal_password, yandex_pairs_with_not_equal_password
+
+
+class WeakPasswordFilter:
+
+    @staticmethod
+    def __check_password(password: PasswordRecord):
+        """
+        Проверка пароля на слабость.
+        """
+        results = zxcvbn(password)
+        score = results.get('score')
+        if score < 3:
+            return True
+        return False
+
+    def check_passwords(self, data: ListPasswordRecords) -> ListPasswordRecords:
+        """
+        Проверка паролей на слабость.
+        """
+        weak_passwords = []
+        for password in data:
+            if self.__check_password(password):
+                weak_passwords.append(password)
+        return weak_passwords

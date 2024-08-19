@@ -6,8 +6,6 @@ PasswordRecord = tuple[str, str, str]
 
 ListPasswordRecords = list[PasswordRecord]
 
-ServiceData = tuple[str, ListPasswordRecords]
-
 
 class AnalyzerMethods(str, Enum):
     """
@@ -16,6 +14,11 @@ class AnalyzerMethods(str, Enum):
     REPEATS_CHECK = "repeats_check"
     NOT_PAIR_CHECK = "not_pair_check"
     PAIR_WITH_ANOTHER_PASSWORD_CHECK = "pair_with_another_password_check"
+
+
+class ServiceData(BaseModel):
+    service_name: str
+    data: ListPasswordRecords
 
 
 class AnalyzerInputData(BaseModel):
@@ -47,3 +50,4 @@ class AnalyzeResult(BaseModel):
     repeats_check: CheckResult
     not_pair_check: CheckResult
     pair_with_another_password_check: CheckResult
+    weak_password_check: CheckResult

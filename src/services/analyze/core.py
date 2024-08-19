@@ -16,6 +16,9 @@ class PasswordAnalyzer:
         ]
 
     def analyze(self, data: AnalyzerInputData) -> AnalyzeResult:
+        """
+        Анализ паролей через хендлеры.
+        """
         result = {}
         for handler in self.handlers:
             result[handler.method] = handler.start_handle(data)

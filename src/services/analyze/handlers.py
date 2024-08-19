@@ -1,6 +1,6 @@
-from src.services.analyze.analyze_types import AnalyzerInputData, CheckResult
+from src.services.analyze.analyze_types import AnalyzerInputData, CheckResult, ServiceData
 from src.services.analyze.base import BaseHandler
-from src.services.analyze.utils import RepeatFilterUtil, NotPairFilter, AnotherPasswordInPairFilter
+from src.services.analyze.utils import RepeatFilterUtil, NotPairFilter, AnotherPasswordInPairFilter, WeakPasswordFilter
 
 
 def clean_repeats(data: AnalyzerInputData) -> AnalyzerInputData:
@@ -26,8 +26,35 @@ class RepeatsHandler(BaseHandler):
         """
         return CheckResult(
             results=[
-                (data.input_data_backup[0], RepeatFilterUtil.get_repeats(data=data.input_data_backup[1])),
-                (data.input_data_cloud[0], RepeatFilterUtil.get_repeats(data=data.input_data_cloud[1]))
+                ServiceData(
+                    service_name=data.input_data_backup.service_name,
+                    data=RepeatFilterUtil.get_repeats(data=data.input_data_backup.data)
+                ),
+                ServiceData(
+                    service_name=data.input_data_cloud.service_name,
+                    data=RepeatFilterUtil.get_repeats(data=data.input_data_cloud.data)
+                )
+            ]
+        )
+
+
+class WeakPasswordsHandler(BaseHandler):
+    """
+    Обработчик повторов.
+    """
+
+    def handle(self, data: AnalyzerInputData) -> CheckResult:
+        """
+        Поиск повторяющихся записей по паре домен-логин в каждом списке записей.
+        """
+        return CheckResult(
+            results=[
+                ServiceData(
+                    service_name=data.input_data_backup.service_name,
+                    data=WeakPasswordFilter().check_passwords(data=data.input_data_backup.data)),
+                ServiceData(
+                    service_name=data.input_data_cloud.service_name,
+                    data=WeakPasswordFilter().check_passwords(data=data.input_data_cloud.data))
             ]
         )
 
@@ -50,13 +77,19 @@ class NotPairsHandler(BaseHandler):
         Поиск не парных записей по паре домен-логин.
         """
         google_unique_list, yandex_unique_list = NotPairFilter().find_not_pair_records(
-            backup_passwords=data.input_data_backup[1],
-            cloud_passwords=data.input_data_cloud[1]
+            backup_passwords=data.input_data_backup.data,
+            cloud_passwords=data.input_data_cloud.data
         )
         return CheckResult(
             results=[
-                (data.input_data_backup[0], google_unique_list),
-                (data.input_data_cloud[0], yandex_unique_list)
+                ServiceData(
+                    service_name=data.input_data_backup.service_name,
+                    data=google_unique_list
+                ),
+                ServiceData(
+                    service_name=data.input_data_cloud.service_name,
+                    data=yandex_unique_list
+                )
             ]
         )
 
