@@ -1,7 +1,7 @@
 import unittest
 
 from src.services.analyze.analyze_types import NotPairResult
-from src.services.analyze.password_analyzer_utils import PasswordAnalyzerUtils
+from src.services.analyze.handlers import PasswordAnalyzerUtils
 
 
 class TestFindNoPairs(unittest.IsolatedAsyncioTestCase):

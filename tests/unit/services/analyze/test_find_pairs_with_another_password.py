@@ -1,7 +1,7 @@
 import unittest
 
 from src.services.analyze.analyze_types import PairResult
-from src.services.analyze.password_analyzer_utils import PasswordAnalyzerUtils
+from src.services.analyze.handlers import PasswordAnalyzerUtils
 
 
 class TestFindPairs(unittest.IsolatedAsyncioTestCase):

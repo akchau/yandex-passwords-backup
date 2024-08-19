@@ -1,6 +1,6 @@
 import unittest
 
-from src.services.analyze.password_analyzer_utils import PasswordAnalyzerUtils
+from src.services.analyze.handlers import PasswordAnalyzerUtils
 
 
 class TestFindRepeats(unittest.IsolatedAsyncioTestCase):

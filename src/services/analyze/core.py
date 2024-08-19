@@ -1,33 +1,22 @@
-from src.services.analyze.analyze_types import NotPairResult, AnalyzeResult, PairResult
-from src.services.analyze.password_analyzer_utils import PasswordAnalyzerUtils
+from src.services.analyze.analyze_types import AnalyzeResult, AnalyzerMethods, AnalyzerInputData
+from src.services.analyze.base import BaseHandler
+from src.services.analyze.handlers import RepeatsHandler, NotPairsHandler, PairsWithNotEqualHandler
 
 
 class PasswordAnalyzer:
+    """
+    Анализатор паролей. Прогоняет данные через хендлеры. И возвращает результат всех проверок.
+    """
 
-    def __init__(self, password_analyzer_utils: PasswordAnalyzerUtils = PasswordAnalyzerUtils()):
-        self.__password_analyzer_utils = password_analyzer_utils
+    def __init__(self):
+        self.handlers: list[BaseHandler] = [
+            RepeatsHandler(method=AnalyzerMethods.REPEATS_CHECK),
+            NotPairsHandler(method=AnalyzerMethods.NOT_PAIR_CHECK),
+            PairsWithNotEqualHandler(method=AnalyzerMethods.PAIR_WITH_ANOTHER_PASSWORD_CHECK)
+        ]
 
-    def analyze(self, yandex_passwords, google_passwords) -> AnalyzeResult:
-        google_repeat_result: list[tuple[str, str, str]] = self.__password_analyzer_utils.find_repeats(
-            data=google_passwords
-        ).repeats
-        yandex_repeat_result: list[tuple[str, str, str]] = self.__password_analyzer_utils.find_repeats(
-            data=yandex_passwords
-        ).repeats
-        not_pair_record_result: NotPairResult = self.__password_analyzer_utils.find_not_pairs(
-            google_passwords=google_passwords,
-            yandex_passwords=yandex_passwords
-        )
-        pair_result: PairResult = self.__password_analyzer_utils.find_pairs_with_another_password(
-            google_passwords=google_passwords,
-            yandex_passwords=yandex_passwords
-        )
-        return AnalyzeResult(
-            google_repeats=google_repeat_result,
-            yandex_repeats=yandex_repeat_result,
-            yandex_not_pair=not_pair_record_result.yandex,
-            google_not_pair=not_pair_record_result.google,
-            pair_result_google=pair_result.google,
-            pair_result_yandex=pair_result.yandex,
-            good_pairs_num=pair_result.good_pairs_num
-        )
+    def analyze(self, data: AnalyzerInputData) -> AnalyzeResult:
+        result = {}
+        for handler in self.handlers:
+            result[handler.method] = handler.start_handle(data)
+        return AnalyzeResult(**result)
