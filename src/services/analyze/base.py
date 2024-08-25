@@ -1,28 +1,57 @@
 from abc import ABC, abstractmethod
-from typing import TypeVar, Generic
 
-from src.services.analyze.analyze_types import AnalyzerMethods, AnalyzerInputData, CheckResult
-
-ReadyForAnalyzeData = TypeVar('ReadyForAnalyzeData')
+from src.services.analyze.analyze_types import Records, ListPasswordRecords
 
 
-class BaseHandler(ABC, Generic[ReadyForAnalyzeData]):
-
-    def __init__(self, method: AnalyzerMethods):
-        self.__method = method
-
-    @property
-    def method(self):
-        return self.__method
-
-    def start_handle(self, data: AnalyzerInputData):
-        clean_data = self.prepare_data(data)
-        return self.handle(clean_data)
-
-    @staticmethod
-    def prepare_data(data: AnalyzerInputData) -> ReadyForAnalyzeData:
-        return data
+class BaseFilterOne(ABC):
+    """
+    Базовый класс при сравнении списка записей
+    """
 
     @abstractmethod
-    def handle(self, data: ReadyForAnalyzeData) -> CheckResult:
+    def _filter(self, data: ListPasswordRecords) -> ListPasswordRecords:
+        """
+        Получить пары, у которых не совпадают пароли.
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    def _prepare_data(self, data: ListPasswordRecords) -> ListPasswordRecords:
+        """
+        Подготовка данных при фильтрации одного списка.
+        """
+        raise NotImplementedError
+
+    def filter(self, data: ListPasswordRecords) -> ListPasswordRecords:
+        """
+        Фильтрация.
+        """
+        clean_data = self._prepare_data(data)
+        return self._filter(clean_data)
+
+
+class BaseFilterPair(ABC):
+    """
+    Базовый класс для фильтроции двух списков записей.
+    """
+
+    @abstractmethod
+    def _compare(self, first: ListPasswordRecords, second: ListPasswordRecords) -> ListPasswordRecords:
+        """
+        Сравнение двух списков.
+        """
+        raise NotImplementedError
+
+    def filter(self, data: Records) -> Records:
+        """
+        Фильтрация.
+        """
+        clean_data = self._prepare_data(data)
+        return self._compare(*clean_data), self._compare(*reversed(clean_data))
+
+    @abstractmethod
+    def _prepare_data(self, data: Records) -> Records:
+        """
+        Подготовка данных при сравнение двух списков.
+        """
         raise NotImplementedError

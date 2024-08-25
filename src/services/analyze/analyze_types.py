@@ -2,9 +2,10 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-PasswordRecord = tuple[str, str, str]
 
-ListPasswordRecords = list[PasswordRecord]
+class HandlingType(str, Enum):
+    ONE_TO_ONE_HANDLING = "ONE_TO_ONE"
+    PAIR_HANDLING = "PAIR_HANDLING"
 
 
 class AnalyzerMethods(str, Enum):
@@ -14,6 +15,10 @@ class AnalyzerMethods(str, Enum):
     REPEATS_CHECK = "repeats_check"
     NOT_PAIR_CHECK = "not_pair_check"
     PAIR_WITH_ANOTHER_PASSWORD_CHECK = "pair_with_another_password_check"
+    WEAK_PASSWORD_CHECK = "weak_password_check"
+
+
+ListPasswordRecords = list[tuple[str, str, str]]
 
 
 class ServiceData(BaseModel):
@@ -21,33 +26,35 @@ class ServiceData(BaseModel):
     data: ListPasswordRecords
 
 
+Input_Type = tuple[ServiceData, ServiceData]
+
+Records = tuple[ListPasswordRecords, ListPasswordRecords]
+
+
 class AnalyzerInputData(BaseModel):
     """
     Входные данные для анализа.
     """
-    input_data_cloud: ServiceData
-    input_data_backup: ServiceData
+    input_data: Input_Type
+
+    @property
+    def records(self) -> Records:
+        return self.input_data[0].data, self.input_data[1].data
 
 
-class CheckResult(BaseModel):
+class CheckResult(ServiceData):
     """
-    Результат проверки двух источников на повторяющиеся записи.
-
-    - results: CheckResult - результат проверки.
+    Результат проверки данных одного сервиса.
     """
-    results: list[ServiceData]
+    analyze_method: AnalyzerMethods
+
+
+OutputType = list[CheckResult]
 
 
 class AnalyzeResult(BaseModel):
     """
     Результат анализа.
 
-    - repeats_check_result: CheckResult - результат проверки повторяющихся записей.
-    - not_pairs_login_check_result: CheckResult - результат проверки не парных записей.
-    - pair_with_another_password_check_result: CheckResult - результат проверки парных записей.
-    - good_pairs_num: int
     """
-    repeats_check: CheckResult
-    not_pair_check: CheckResult
-    pair_with_another_password_check: CheckResult
-    weak_password_check: CheckResult
+    analyze_result: OutputType

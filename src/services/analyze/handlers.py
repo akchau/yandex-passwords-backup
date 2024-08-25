@@ -1,131 +1,116 @@
-from src.services.analyze.analyze_types import AnalyzerInputData, CheckResult, ServiceData
-from src.services.analyze.base import BaseHandler
-from src.services.analyze.utils import RepeatFilterUtil, NotPairFilter, AnotherPasswordInPairFilter, WeakPasswordFilter
+from src.services.analyze import analyze_types, base, utils
+from src.services.analyze.utils import find_first_in_second
 
 
-def clean_repeats(data: AnalyzerInputData) -> AnalyzerInputData:
+class RepeatFilter(base.BaseFilterOne):
     """
-    Очистить повторы.
-    """
-    return AnalyzerInputData(
-        input_data_cloud=(
-            data.input_data_backup[0], RepeatFilterUtil.get_unique_records(data.input_data_backup[1])
-        ),
-        input_data_backup=(
-            data.input_data_cloud[0], RepeatFilterUtil.get_unique_records(data.input_data_cloud[1]))
-    )
-
-
-class RepeatsHandler(BaseHandler):
-    """
-    Обработчик повторов.
-    """
-    def handle(self, data: AnalyzerInputData) -> CheckResult:
-        """
-        Поиск повторяющихся записей по паре домен-логин в каждом списке записей.
-        """
-        return CheckResult(
-            results=[
-                ServiceData(
-                    service_name=data.input_data_backup.service_name,
-                    data=RepeatFilterUtil.get_repeats(data=data.input_data_backup.data)
-                ),
-                ServiceData(
-                    service_name=data.input_data_cloud.service_name,
-                    data=RepeatFilterUtil.get_repeats(data=data.input_data_cloud.data)
-                )
-            ]
-        )
-
-
-class WeakPasswordsHandler(BaseHandler):
-    """
-    Обработчик повторов.
+    Фильтр повторов.
     """
 
-    def handle(self, data: AnalyzerInputData) -> CheckResult:
+    def _prepare_data(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        Поиск повторяющихся записей по паре домен-логин в каждом списке записей.
+        Подготовка не нужна.
         """
-        return CheckResult(
-            results=[
-                ServiceData(
-                    service_name=data.input_data_backup.service_name,
-                    data=WeakPasswordFilter().check_passwords(data=data.input_data_backup.data)),
-                ServiceData(
-                    service_name=data.input_data_cloud.service_name,
-                    data=WeakPasswordFilter().check_passwords(data=data.input_data_cloud.data))
-            ]
-        )
+        return data
+
+    def _filter(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
+        """
+        Получение списка повторов.
+        """
+        return utils.find_repeats(data)
 
 
-class NotPairsHandler(BaseHandler):
+class UniqueFilter(base.BaseFilterOne):
     """
-    Обработчик несовпадающих пар.
+    Фильтр уникальных записей.
     """
 
-    def prepare_data(self, data: AnalyzerInputData) -> AnalyzerInputData:
+    def _prepare_data(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        Подготовка данных:
+        Подготовка не нужна.
+        """
+        return data
 
-        - Из каждого списка уберем повторяющиеся элементы.
+    def _filter(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        return clean_repeats(data)
-
-    def handle(self, data: AnalyzerInputData) -> CheckResult:
+        Получение списка повторов.
         """
-        Поиск не парных записей по паре домен-логин.
-        """
-        google_unique_list, yandex_unique_list = NotPairFilter().find_not_pair_records(
-            backup_passwords=data.input_data_backup.data,
-            cloud_passwords=data.input_data_cloud.data
-        )
-        return CheckResult(
-            results=[
-                ServiceData(
-                    service_name=data.input_data_backup.service_name,
-                    data=google_unique_list
-                ),
-                ServiceData(
-                    service_name=data.input_data_cloud.service_name,
-                    data=yandex_unique_list
-                )
-            ]
-        )
+        return utils.find_repeats(data, unique=True)
 
 
-class PairsWithNotEqualHandler(BaseHandler):
+class WeakPasswordFilter(base.BaseFilterOne):
     """
-    Обработчик пар с разными паролями.
+    Фильтр слабых паролей.
     """
 
-    def prepare_data(self, data: AnalyzerInputData) -> AnalyzerInputData:
+    def _prepare_data(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        Подготовка данных:
+        Фильтруем только уникальные значения.
+        """
+        return UniqueFilter().filter(data)
 
-        - Из каждого списка уберем повторяющиеся элементы.
+    def _filter(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        clean_data: AnalyzerInputData = clean_repeats(data)
-        backup_data, cloud_data = NotPairFilter().find_pair_records(
-            backup_passwords=clean_data.input_data_backup[1],
-            cloud_passwords=clean_data.input_data_cloud[1]
-        )
-        return AnalyzerInputData(
-            input_data_backup=(clean_data.input_data_backup[0], backup_data),
-            input_data_cloud=(clean_data.input_data_cloud[0], cloud_data)
-        )
+        Проверка паролей на слабость.
+        """
+        weak_passwords = []
+        for password_record in data:
+            if utils.check_password_to_weak(password_record[2]):
+                weak_passwords.append(password_record)
+        return weak_passwords
 
-    def handle(self, data: AnalyzerInputData) -> CheckResult:
+
+class NotPairFilter(base.BaseFilterPair):
+    """
+    Фильтр непар.
+    """
+
+    def _compare(self, first: analyze_types.ListPasswordRecords,
+                 second: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
-        Поиск пар, у которых отличается пароль.
+        Получение записей у которых нет пары по url-логин в другом источнике.
         """
-        google_unique_list, yandex_unique_list = AnotherPasswordInPairFilter().find_another_password_in_pair(
-            backup_passwords=data.input_data_backup[1],
-            cloud_passwords=data.input_data_cloud[1]
-        )
-        return CheckResult(
-            results=[
-                (data.input_data_backup[0], google_unique_list),
-                (data.input_data_cloud[0], yandex_unique_list)
-            ]
-        )
+        return find_first_in_second(first, second, depth=2, include=False)
+
+    def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
+        """
+        Фильтруем только уникальные значения.
+        """
+        return UniqueFilter().filter(data[0]), UniqueFilter().filter(data[1])
+
+
+class PairFilter(base.BaseFilterPair):
+    """
+    Фильтр пар.
+    """
+    def _compare(self, first: analyze_types.ListPasswordRecords,
+                 second: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
+        """
+        Получение записей у которых есть пара по url-логин в другом источнике.
+        """
+        return find_first_in_second(first, second, depth=2)
+
+    def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
+        """
+        Фильтруем только уникальные значения.
+        """
+        return UniqueFilter().filter(data[0]), UniqueFilter().filter(data[1])
+
+
+class AnotherPasswordInPairFilter(base.BaseFilterPair):
+    """
+    Фильтр пар у которых отличается пароль.
+    """
+
+    def _compare(self, first: analyze_types.ListPasswordRecords,
+                 second: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
+        """
+        Получение пар у которых отличается пароль.
+        """
+        return find_first_in_second(first, second, depth=3, include=False)
+
+    def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
+        """
+        Фильтруем только пары.
+        """
+        return PairFilter().filter(data)

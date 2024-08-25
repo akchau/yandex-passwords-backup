@@ -1,147 +1,55 @@
 from zxcvbn import zxcvbn
-from src.services.analyze.analyze_types import ListPasswordRecords, PasswordRecord
+from src.services.analyze.analyze_types import ListPasswordRecords
 
 
-class RepeatFilterUtil:
+def get_set(passwords_list: ListPasswordRecords, depth: int) -> set:
     """
-    Фильтр повторов.
+    Получение сета кортежей c определенной глубиной.
     """
-
-    @staticmethod
-    def get_repeats(data: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Получение списка повторов.
-        """
-        seen = set()
-        duplicates = set()
-        for record in data:
-            pair = tuple(record[:2])
-            if pair in seen:
-                duplicates.add(record)
-            else:
-                seen.add(pair)
-        return list(duplicates)
-
-    @staticmethod
-    def get_unique_records(data: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Отрезание повторов и генерация списка уникальных записей.
-        """
-        seen = set()
-        unique_records = set()
-        for record in data:
-            pair = tuple(record[:2])
-            if pair not in seen:
-                unique_records.add(record)
-                seen.add(pair)
-        return list(unique_records)
+    return set(tuple(sorted(t)) for t in [tuple_in_depth(record, depth) for record in passwords_list])
 
 
-class NotPairFilter:
-    """
-    Фильтр пар.
-    """
-
-    @staticmethod
-    def __get_set_cut_passwords(passwords_list: ListPasswordRecords) -> set:
-        """
-        Получение сета кортежей состоящего только из url-login.
-        """
-        return set(tuple(sorted(t)) for t in [(record[0], record[1]) for record in passwords_list])
-
-    def __compare_to_pair(self, passwords_list: ListPasswordRecords,
-                          compare_passwords_list: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Получение записей у которых есть пара по url-логин в другом источнике.
-        """
-        return [t for t in passwords_list if
-                tuple(sorted((t[0], t[1]))) not in self.__get_set_cut_passwords(compare_passwords_list)]
-
-    def __compare_to_not_pair(self, passwords_list: ListPasswordRecords,
-                              compare_passwords_list: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Получение записей у которых нет пары по url-логин в другом источнике.
-        """
-        return [t for t in passwords_list if
-                tuple(sorted((t[0], t[1]))) not in self.__get_set_cut_passwords(compare_passwords_list)]
-
-    def find_not_pair_records(self, backup_passwords: ListPasswordRecords,
-                              cloud_passwords: ListPasswordRecords
-                              ) -> tuple[ListPasswordRecords, ListPasswordRecords]:
-        """
-        Найти записи с уникальной парой url в двух источниках.
-        """
-        return (self.__compare_to_not_pair(passwords_list=backup_passwords, compare_passwords_list=cloud_passwords),
-                self.__compare_to_not_pair(passwords_list=cloud_passwords, compare_passwords_list=backup_passwords))
-
-    def find_pair_records(self, backup_passwords: ListPasswordRecords,
-                          cloud_passwords: ListPasswordRecords) -> tuple[ListPasswordRecords, ListPasswordRecords]:
-        """
-        Найти записи с условием пара url-логин совпадает в двух источниках.
-        """
-        return (
-            self.__compare_to_pair(passwords_list=backup_passwords, compare_passwords_list=cloud_passwords),
-            self.__compare_to_pair(passwords_list=cloud_passwords, compare_passwords_list=backup_passwords)
+def tuple_in_depth(data: tuple[str, str, str], depth: int):
+    return tuple(
+        sorted(
+            tuple(
+                [data[index] for index in range(depth)]
+            )
         )
+    )
 
 
-class AnotherPasswordInPairFilter:
+def find_first_in_second(first: ListPasswordRecords, second: ListPasswordRecords,
+                         depth: int, include=True) -> ListPasswordRecords:
+    if include:
+        return [t for t in first if tuple_in_depth(t, depth) in get_set(second, depth)]
+    else:
+        return [t for t in first if tuple_in_depth(t, depth) not in get_set(second, depth)]
+
+
+def check_password_to_weak(password: str) -> bool:
     """
-    Фильтр пар у которых отличается пароль.
+    Проверка пароля на слабость.
     """
-
-    @staticmethod
-    def __get_set_with_password(passwords_list: ListPasswordRecords) -> set:
-        """
-        Получение сета с кортежами состоящих из записей.
-        """
-        return set(tuple(sorted(t)) for t in passwords_list)
-
-    def __compare_pairs(self, passwords_list: ListPasswordRecords,
-                        compare_passwords_list: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Получение пар у которых отличается пароль.
-        """
-        return [
-            t for t in passwords_list
-            if tuple(sorted(t)) not in self.__get_set_with_password(compare_passwords_list)
-        ]
-
-    def find_another_password_in_pair(self, backup_passwords: ListPasswordRecords,
-                                      cloud_passwords: ListPasswordRecords
-                                      ) -> tuple[ListPasswordRecords, ListPasswordRecords]:
-        """
-        Получить пары, у которых не совпадают пароли.
-        """
-        google_pairs_with_not_equal_password: ListPasswordRecords = self.__compare_pairs(
-            passwords_list=cloud_passwords,
-            compare_passwords_list=backup_passwords)
-        yandex_pairs_with_not_equal_password: ListPasswordRecords = self.__compare_pairs(
-            passwords_list=cloud_passwords,
-            compare_passwords_list=backup_passwords
-        )
-        return google_pairs_with_not_equal_password, yandex_pairs_with_not_equal_password
+    results = zxcvbn(password)
+    score = results.get('score')
+    if isinstance(score, int) and score < 3:
+        return True
+    return False
 
 
-class WeakPasswordFilter:
-
-    @staticmethod
-    def __check_password(password: PasswordRecord):
-        """
-        Проверка пароля на слабость.
-        """
-        results = zxcvbn(password)
-        score = results.get('score')
-        if score < 3:
-            return True
-        return False
-
-    def check_passwords(self, data: ListPasswordRecords) -> ListPasswordRecords:
-        """
-        Проверка паролей на слабость.
-        """
-        weak_passwords = []
-        for password in data:
-            if self.__check_password(password):
-                weak_passwords.append(password)
-        return weak_passwords
+def find_repeats(data: ListPasswordRecords, unique=False) -> ListPasswordRecords:
+    """
+    Получение списка повторов.
+    """
+    seen = set()
+    duplicates = set()
+    unique_records = set()
+    for record in data:
+        pair = tuple(record[:2])
+        if pair in seen:
+            duplicates.add(record)
+        else:
+            seen.add(pair)
+            unique_records.add(record)
+    return list(unique_records) if unique else list(duplicates)
