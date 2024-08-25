@@ -4,6 +4,9 @@ from src.services.analyze.analyze_types import Records, ListPasswordRecords
 
 
 class BaseFilterOne(ABC):
+
+    def __init__(self):
+        pass
     """
     Базовый класс при сравнении списка записей
     """

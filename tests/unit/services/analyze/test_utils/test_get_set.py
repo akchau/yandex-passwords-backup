@@ -1,6 +1,6 @@
 import unittest
 
-from src.services.analyze.utils import get_set
+from src.services.analyze.algorythms import CompareListRecordAlgorythm
 
 
 class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
@@ -27,7 +27,7 @@ class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
         ]
 
         for value, result in test_values:
-            self.assertEqual(get_set(value, depth=2), result)
+            self.assertEqual(CompareListRecordAlgorythm()._get_set(value, depth=2), result)
 
     def test_good_case_depth_three(self):
         test_values = [
@@ -53,4 +53,4 @@ class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
         ]
 
         for value, result in test_values:
-            self.assertEqual(get_set(value, depth=3), result)
+            self.assertEqual(CompareListRecordAlgorythm()._get_set(value, depth=3), result)

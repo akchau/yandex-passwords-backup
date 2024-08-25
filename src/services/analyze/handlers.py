@@ -1,5 +1,4 @@
-from src.services.analyze import analyze_types, base, utils
-from src.services.analyze.utils import find_first_in_second
+from src.services.analyze import analyze_types, base, algorythms
 
 
 class RepeatFilter(base.BaseFilterOne):
@@ -17,7 +16,7 @@ class RepeatFilter(base.BaseFilterOne):
         """
         Получение списка повторов.
         """
-        return utils.find_repeats(data)
+        return algorythms.RepeatsAlgorythm().find_repeats(data)
 
 
 class UniqueFilter(base.BaseFilterOne):
@@ -35,7 +34,7 @@ class UniqueFilter(base.BaseFilterOne):
         """
         Получение списка повторов.
         """
-        return utils.find_repeats(data, unique=True)
+        return algorythms.RepeatsAlgorythm().find_repeats(data, unique=True)
 
 
 class WeakPasswordFilter(base.BaseFilterOne):
@@ -47,17 +46,13 @@ class WeakPasswordFilter(base.BaseFilterOne):
         """
         Фильтруем только уникальные значения.
         """
-        return UniqueFilter().filter(data)
+        return algorythms.RepeatsAlgorythm().find_repeats(data, unique=True)
 
     def _filter(self, data: analyze_types.ListPasswordRecords) -> analyze_types.ListPasswordRecords:
         """
         Проверка паролей на слабость.
         """
-        weak_passwords = []
-        for password_record in data:
-            if utils.check_password_to_weak(password_record[2]):
-                weak_passwords.append(password_record)
-        return weak_passwords
+        return algorythms.WeakPasswordSearchAlgorythm().find_weak_passwords(data)
 
 
 class NotPairFilter(base.BaseFilterPair):
@@ -70,7 +65,7 @@ class NotPairFilter(base.BaseFilterPair):
         """
         Получение записей у которых нет пары по url-логин в другом источнике.
         """
-        return find_first_in_second(first, second, depth=2, include=False)
+        return algorythms.CompareListRecordAlgorythm().find_first_in_second(first, second, depth=2, include=False)
 
     def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
         """
@@ -88,7 +83,7 @@ class PairFilter(base.BaseFilterPair):
         """
         Получение записей у которых есть пара по url-логин в другом источнике.
         """
-        return find_first_in_second(first, second, depth=2)
+        return algorythms.CompareListRecordAlgorythm().find_first_in_second(first, second, depth=2)
 
     def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
         """
@@ -107,7 +102,7 @@ class AnotherPasswordInPairFilter(base.BaseFilterPair):
         """
         Получение пар у которых отличается пароль.
         """
-        return find_first_in_second(first, second, depth=3, include=False)
+        return algorythms.CompareListRecordAlgorythm().find_first_in_second(first, second, depth=3, include=False)
 
     def _prepare_data(self, data: analyze_types.Records) -> analyze_types.Records:
         """
