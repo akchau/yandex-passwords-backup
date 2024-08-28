@@ -51,6 +51,15 @@ class TestFindFirstInSecond(unittest.IsolatedAsyncioTestCase):
                 ("one", "two", "three"),
                 [("one", "two", "three")]
 
+            ),
+            (
+                ("seven", "eight", "nine"),
+                [
+                    ("ten", "eleven", "twelwe"),
+                    ("odin", "dva", "tri"),
+                    ("seven", "eight", "nine")
+                ]
+
             )
         ]
         for data, list_of_records, in test_data:
