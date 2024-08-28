@@ -1,6 +1,7 @@
 import unittest
 
 from src.services.analyze.algorythms import CompareListRecordAlgorythm
+from src.services.analyze.analyze_exceptions import AnalyzeException
 
 
 class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
@@ -18,10 +19,9 @@ class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
                     ("three", "four", "five"),
                 ],
                 {
-                    ('four', 'three'),
+                    ('one', 'two'),
                     ('one_two', 'two_one'),
-                    ('one', 'two')
-                }
+                    ('three', 'four')}
 
             )
         ]
@@ -42,15 +42,19 @@ class TestGetSetCutPasswords(unittest.IsolatedAsyncioTestCase):
                     ("three", "four", "five"),
                 ],
                 {
-                    ('five', 'four', 'three'),
-                    ('one_two', 'three', 'two_one'),
-                    ('one', 'three', 'two'),
-                    ('four', 'one', 'two'),
-
+                    ('one', 'two', 'four'),
+                    ('three', 'four', 'five'),
+                    ('one', 'two', 'three'),
+                    ('one_two', 'two_one', 'three')
                 }
 
             )
         ]
 
         for value, result in test_values:
+            print(CompareListRecordAlgorythm()._get_set(value, depth=3))
             self.assertEqual(CompareListRecordAlgorythm()._get_set(value, depth=3), result)
+
+    def test_good_case_depth_too_much(self):
+        with self.assertRaises(AnalyzeException):
+            CompareListRecordAlgorythm()._get_set([("one", "two", "three")], depth=4)

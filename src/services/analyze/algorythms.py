@@ -1,4 +1,6 @@
 from zxcvbn import zxcvbn
+
+from src.services.analyze.analyze_exceptions import AnalyzeException
 from src.services.analyze.analyze_types import ListPasswordRecords
 
 
@@ -11,17 +13,17 @@ class CompareListRecordAlgorythm:
         """
         Получение сета кортежей c определенной глубиной.
         """
-        return set(tuple(sorted(t)) for t in [self._tuple_in_depth(record, depth) for record in passwords_list])
+        return set(tuple(t) for t in [self._tuple_in_depth(record, depth) for record in passwords_list])
 
     @staticmethod
     def _tuple_in_depth(data: tuple[str, str, str], depth: int):
-        return tuple(
-            sorted(
+        if 0 < depth <= len(data):
+            return tuple(
                 tuple(
                     [data[index] for index in range(depth)]
                 )
             )
-        )
+        raise AnalyzeException("Глубина превышает длину списка или отрицательное число.")
 
     def _item_in_second(self, item: tuple[str, str, str], list_of_records: ListPasswordRecords, depth: int):
         """
