@@ -46,11 +46,12 @@ class PasswordAnalyzer:
 
     @staticmethod
     def __handle_pair(data: analyze_types.AnalyzerInputData, method: analyze_types.AnalyzerMethods,
-                      handler: base.BaseFilterPair) -> analyze_types.OutputType:
+                      prepare_data_callback, handle_callback) -> analyze_types.OutputType:
         """
         Обработка данных в паре.
         """
-        result: Records = handler.filter(data.records)
+        clean_data = prepare_data_callback(data)
+        result = handle_callback(*clean_data), handle_callback(*reversed(clean_data))
         return [
             analyze_types.CheckResult(
                 service_name=data.input_data[index].service_name,
@@ -69,5 +70,5 @@ class PasswordAnalyzer:
             if handling_type == analyze_types.HandlingType.ONE_TO_ONE_HANDLING:
                 results.extend(self.__handle_one_to_one(method=method, data=data, handler=handler))
             if handling_type == analyze_types.HandlingType.PAIR_HANDLING:
-                results.extend(self.__handle_pair(method=method, data=data, handler=handler))
+                results.extend(self.__handle_pair(method=method, data=data))
         return analyze_types.AnalyzeResult(analyze_result=results)

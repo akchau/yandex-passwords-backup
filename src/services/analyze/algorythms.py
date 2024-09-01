@@ -63,18 +63,21 @@ class WeakPasswordSearchAlgorythm:
 class RepeatsAlgorythm:
 
     @staticmethod
-    def find_repeats(data: ListPasswordRecords, unique=False) -> ListPasswordRecords:
+    def find_repeats(data: list[ListPasswordRecords], unique=False) -> list[ListPasswordRecords]:
         """
         Получение списка повторов.
         """
-        seen = set()
-        duplicates = set()
-        unique_records = set()
-        for record in data:
-            pair = tuple(record[:2])
-            if pair in seen:
-                duplicates.add(record)
-            else:
-                seen.add(pair)
-                unique_records.add(record)
-        return list(unique_records) if unique else list(duplicates)
+        result = []
+        for list_password_records in data:
+            seen = set()
+            duplicates = set()
+            unique_records = set()
+            for record in list_password_records:
+                pair = tuple(record[:2])
+                if pair in seen:
+                    duplicates.add(record)
+                else:
+                    seen.add(pair)
+                    unique_records.add(record)
+            result.append(list(unique_records) if unique else list(duplicates))
+        return result

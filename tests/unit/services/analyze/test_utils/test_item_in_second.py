@@ -11,7 +11,9 @@ class TestFindFirstInSecond(unittest.IsolatedAsyncioTestCase):
     def test_good_case_depth_2_true(self):
         result = self.algorythm._item_in_second(
             item=("one", "two", "three"),
-            list_of_records=[("one", "two", "four")],
+            list_of_records=[
+                ("one", "two", "four")
+            ],
             depth=2
         )
         self.assertEqual(result, True)
